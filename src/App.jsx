@@ -1,78 +1,73 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
-
-
+import AddBlog from "./components/AddBlog";
+import Blog from "./components/Blog";
 function App() {
   const [blogs, setBlogs] = useState([]);
 
-  // useEffect(()=>{
-  //    fetch('https://www.googleapis.com/blogger/v3/blogs/2399953?key=AIzaSyCNWjRNjaJwCTNM0qUBgq4uHDyNveN6eN0')
-  //    .then((response) => response.json())
-  //    .then((data)=>{
-  //    setBlogs(data);
-  //    })
-  //    .catch((err)=>{
-  //     console.log(err.message);
-  //    })
-  // })
+  const fetchBlog = () => {
+    fetch("https://jsonplaceholder.typicode.com/posts?_limit=4")
+      .then((response) => response.json())
+      .then((data) => setBlogs(data));
+  }
 
-  // const AddPost =(name,url) =>{
-  //   fetch('https://www.googleapis.com/blogger/v3/blogs/2399953?key=AIzaSyCNWjRNjaJwCTNM0qUBgq4uHDyNveN6eN0',{
-  //     method:'POST',
-  //     body: JSON.stringify({
-  //       name:name,
-  //       url:url,
-  //       userId:Math.random().toString(36).slice(2),
-  //     }),
-  //     headers:{
-  //       'content-type':'application/json;charset=UTF-8',
-  //     }
-  //   })
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     setBlogs((prevBlogs) => [data, ...prevBlogs])
-  //   })
-  
+  useEffect(()=>{
+    fetchBlog()
+  },[]);
+   
+  const addBlog = (title, body) =>{
+    fetch('https://jsonplaceholder.typicode.com/posts',{
 
-  // }
-  // const deletePost = (id) => {
-  //   fetch(`https://www.googleapis.com/blogger/v3/blogs/2399953?key=AIzaSyCNWjRNjaJwCTNM0qUBgq4uHDyNveN6eN0/${id}`, {
-  //     method: 'DELETE'
-  //   })
-  //   .then((response) => {
-  //     if(response.status === 200) {
-  //       setPosts(
-  //         posts.filter((post) => {
-  //           return post.id !== id;
-  //         })
-  //       )
-  //     }
-  //   })
-  // };
-  https://www.googleapis.com/blogger/v3/blogs/2399953?key=AIzaSyCNWjRNjaJwCTNM0qUBgq4uHDyNveN6eN0
-   useEffect(()=>{
-    fetch('https://www.googleapis.com/blogger/v3/blogs/2399953?key=AIzaSyCNWjRNjaJwCTNM0qUBgq4uHDyNveN6eN0')
-    .then((response)=> response.json())
-    .then((data) =>{
-      console.log(data);
-      setBlogs(data);
+      method:'POST',
+      body: JSON.stringify({
+        title: title,
+        body: body,
+        userId: Math.random().toString(36).slice(2),
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+    },
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    setBlogs((prevBlogs) => [data, ...prevBlogs])
+  });
+}
+  const  deleteBlog = (id) =>{
+    fetch(`https://jsonplaceholder.typicode.com/posts/${id}`,{
+       method:"DELETE"
     })
-   },[])
-   return (
-    <div className="posts-container">
-       {blogs.map((blog) => {
-          return (
-             <div className="post-card" key={blog.id}>
-                <h2 className="post-title">{blog.name}</h2>
-                <p className="post-body">{blog.description}</p>
-                <div className="button">
-                <div className="delete-btn">Delete</div>
-                </div>
-             </div>
-          );
-       })}
-    </div>
-    );
+    .then((response) =>{
+      if (response.status === 200) {
+         setBlogs(
+          blogs.filter((blog)=>{
+            return blog.id !== id;
+          })
+         )
+      }
+    })
+  }
+
+
+
+  return (
+    <main className="flex flex-col justify-center bg-slate-700 font-serif ">
+      <h1 className="text-blue-200 text-center text-[32px] ">Blog App</h1>
+      <AddBlog addBlog={addBlog} />
+      <h2>Blog</h2>
+      <section className="grid grid-cols-2 gap-4 items-center ml-10">
+        {blogs.map((blog) => (
+          <Blog
+            key={blog.id}
+            id={blog.id}
+            tittle={blog.tittle}
+            body={blog.body}
+            deleteBlog={deleteBlog}
+          />
+        ))}
+      </section>
+    </main>
+  );
 }
 
 export default App;
